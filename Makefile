@@ -349,5 +349,5 @@ cpiolist:
 
 .PHONY: clean
 clean:
-	rm -r fs cpiolist *-*/ *-*.tar* LVM2.*
+	yes | rm -r fs cpiolist *-*/ *-*.tar* LVM2.*
 
