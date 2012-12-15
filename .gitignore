@@ -10,4 +10,6 @@ cpiolist
 
 /*-*.tar*
 /*-*/
+/LVM2.*
+/LVM2.*/
 

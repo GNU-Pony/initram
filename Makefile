@@ -214,6 +214,26 @@ popt:
 
 
 glibc:
+	wget 'http://ftp.gnu.org/gnu/libc/glibc-2.16.0.tar.xz'
+	tar --xz --get < glibc-2.16.0.tar.xz
+	cd glibc-2.16.0 && \
+	mkdir -p glibc-build && \
+	cd glibc-build && \
+	../configure \
+	        --prefix=/usr \
+	        --libdir=/usr/lib \
+	        --libexecdir=/usr/libexec \
+	        --with-headers=/usr/include \
+	        --enable-add-ons=nptl,libidn \
+	        --enable-obsolete-rpc \
+	        --enable-kernel=2.6.32 \
+	        --enable-bind-now \
+	        --disable-profile \
+	        --enable-stackguard-randomization \
+	        --enable-multi-arch && \
+	make && \
+	make install_root="$$(cd ../../fs ; pwd)" install && \
+	cd ../..
 
 
 zlib:
@@ -281,6 +301,31 @@ cryptsetup:
 
 
 device-mapper:
+	wget 'ftp://sources.redhat.com/pub/lvm2/LVM2.2.02.98.tgz'
+	mv LVM2.2.02.98.tgz LVM2.2.02.98.tar.gz
+	tar --gzip --get < LVM2.2.02.98.tar.gz
+	cd LVM2.2.02.98 && \
+	unset LDFLAGS && \
+	./configure --prefix=/usr \
+	            --sysconfdir=/etc \
+	            --localstatedir=/var \
+	            --with-udev-prefix=/usr \
+	            --with-systemdsystemunitdir=/usr/lib/systemd/system \
+	            --with-default-pid-dir=/run \
+	            --with-default-dm-run-dir=/run \
+	            --with-default-run-dir=/run/lvm \
+	            --enable-pkgconfig \
+	            --enable-readline \
+	            --enable-dmeventd \
+	            --enable-cmdlib \
+	            --enable-applib \
+	            --enable-udev_sync \
+	            --enable-udev_rules \
+	            --with-default-locking-dir=/run/lock/lvm \
+	            --enable-lvmetad && \
+	make && \
+	make DESTDIR="$$(cd ../fs ; pwd)" install_device-mapper && \
+	cd ..
 
 
 libgcrypt:
@@ -304,5 +349,5 @@ cpiolist:
 
 .PHONY: clean
 clean:
-	rm -r fs cpiolist *-*/ *-*.tar*
+	rm -r fs cpiolist *-*/ *-*.tar* LVM2.*
 
