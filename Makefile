@@ -1,4 +1,5 @@
-all: dirs linkdirs linkfiles touches
+all: dirs linkdirs linkfiles touches cpiolist
+
 
 dirs:
 	mkdir -p fs/"dev"
@@ -36,11 +37,15 @@ linkdirs:
 linkfiles:
 	if [ -e fs/"etc/mtab" ]; then  $(RM) fs/"etc/mtab";  fi
 
-	ln -s "/proc/self/mounts" fs/"mtab"
+	ln -s "/proc/self/mounts" fs/"etc/mtab"
 
 
 touches:
 	touch fs/"etc/udev/udev.conf"
 	touch fs/"etc/fstab"
 	touch fs/"etc/initrd-release"
+
+
+cpiolist:
+	find $$(pwd)/fs | ./cpiolist.py $$(pwd)/fs > cpiolist
 
