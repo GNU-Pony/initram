@@ -301,3 +301,8 @@ removestuff:
 cpiolist:
 	find $$(pwd)/fs | ./cpiolist.py $$(pwd)/fs > cpiolist
 
+
+.PHONY: clean
+clean:
+	rm -r fs cpiolist *-*/ *-*.tar*
+
