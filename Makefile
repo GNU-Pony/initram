@@ -1,7 +1,13 @@
 BUSYBOX_VERSION = 1.20.2
+KMOD_VERSION = 12
 
 
-all: dirs linkdirs linkfiles touches busybox cpiolist
+all: dirs linkdirs linkfiles touches programs removestuff cpiolist
+
+
+programs: busybox kmod util-linux popt glibc \
+	  zlib libgpg-error e2fsprogs attr acl \
+	  cryptsetup device-mapper libgcrypt
 
 
 dirs:
@@ -160,6 +166,136 @@ busybox:
 	ln -s busybox fs/"usr/bin/wget"
 	ln -s busybox fs/"usr/bin/yes"
 
+
+kmod:
+	wget "ftp://ftp.kernel.org/pub/linux/utils/kernel/kmod/kmod-$(KMOD_VERSION).tar.xz"
+	tar --xz --get < "kmod-$(KMOD_VERSION).tar.xz"
+	cd "kmod-$(KMOD_VERSION)" && \
+	./configure --sysconfdir=/etc --with-zlib && \
+	make && \
+	make DESTDIR="$$(cd ../fs ; pwd)" install && \
+	cd ..
+
+	ln -s kmod fs/"usr/bin/depmod"
+	ln -s kmod fs/"usr/bin/insmod"
+	ln -s kmod fs/"usr/bin/lsmod"
+	ln -s kmod fs/"usr/bin/modinfo"
+	ln -s kmod fs/"usr/bin/modprobe"
+	ln -s kmod fs/"usr/bin/rmmod"
+
+
+util-linux:
+	cp $$(which fsck.ext4) fs/"usr/bin"
+	cp $$(which fsck) fs/"usr/bin"
+	cp $$(which blkid) fs/"usr/bin"
+	cp $$(which mount) fs/"usr/bin"
+	cp $$(which switch_root) fs/"usr/bin"
+
+	ln -s fsck.ext4 fs/"usr/bin/fsck.ext2"
+	ln -s fsck.ext4 fs/"usr/bin/fsck.ext3"
+
+	cp "/usr/lib/libblkid.so.1.1.0" fs/"usr/lib"
+	cp "/usr/lib/libmount.so.1.1.0" fs/"usr/lib"
+	cp "/usr/lib/libuuid.so.1.3.0" fs/"usr/lib"
+
+	ln -s libblkid.so.1{,.1.0}
+	ln -s libmount.so.1{,.1.0}
+	ln -s libuuid.so.1{,.3.0}
+
+
+popt:
+	wget 'http://rpm5.org/files/popt/popt-1.16.tar.gz'
+	tar --gzip --get < popt-1.16.tar.gz
+	cd popt-1.16 && \
+	./configure --prefix=/usr && \
+	make && \
+	make DESTDIR="$$(cd ../fs ; pwd)" install && \
+	cd ..
+
+
+glibc:
+
+
+zlib:
+	wget 'http://zlib.net/current/zlib-1.2.7.tar.gz'
+	tar --gzip --get < zlib-1.2.7.tar.gz
+	cd zlib-1.2.7 && \
+	./configure --prefix=/usr && \
+	make && \
+	make DESTDIR="$$(cd ../fs ; pwd)" install && \
+	cd ..
+
+
+libgpg-error:
+	wget 'ftp://ftp.gnupg.org/gcrypt/libgpg-error/libgpg-error-1.10.tar.bz2'
+	tar --bzip2 --get < libgpg-error-1.10.tar.bz2
+	cd libgpg-error-1.10 && \
+	./configure --prefix=/usr && \
+	make && \
+	make DESTDIR="$$(cd ../fs ; pwd)"/ install && \
+	cd ..
+
+
+e2fsprogs:
+	wget 'http://downloads.sourceforge.net/sourceforge/e2fsprogs/e2fsprogs-1.42.6.tar.gz'
+	tar --gzip --get < e2fsprogs-1.42.6.tar.gz
+	cd e2fsprogs-1.42.6 && \
+	./configure --prefix=/usr --with-root-prefix= --libdir=/usr/lib \
+	            --enable-elf-shlibs --disable-fsck --disable-uuidd \
+	            --disable-libuuid --disable-libblkid && \
+	make && \
+	make DESTDIR="$$(cd ../fs ; pwd)" install install-libs && \
+	cd ..
+
+
+attr:
+	wget 'http://download.savannah.gnu.org/releases/attr/attr-2.4.46.src.tar.gz'
+	tar --gzip --get < attr-2.4.46.src.tar.gz
+	cd attr-2.4.46 && \
+	export INSTALL_USER=root INSTALL_GROUP=root && \
+	./configure --prefix=/usr --libdir=/usr/lib --libexecdir=/usr/lib && \
+	make && \
+	make DIST_ROOT="$$(cd ../fs ; pwd)" install install-lib install-dev && \
+	cd ..
+
+
+acl:
+	wget 'http://download.savannah.gnu.org/releases/acl/acl-2.2.51.src.tar.gz'
+	tar --gzip --get < acl-2.2.51.src.tar.gz
+	cd acl-2.2.51 && \
+	export INSTALL_USER=root INSTALL_GROUP=root && \
+	./configure --prefix=/usr --libdir=/usr/lib --libexecdir=/usr/lib && \
+	make && \
+	make DIST_ROOT="$$(cd ../fs ; pwd)" install install-lib install-dev && \
+	cd ..
+
+
+cryptsetup:
+	wget 'http://cryptsetup.googlecode.com/files/cryptsetup-1.5.1.tar.bz2'
+	tar --bzip2 --get < cryptsetup-1.5.1.tar.bz2
+	cd cryptsetup-1.5.1 && \
+	./configure --prefix=/usr --disable-static --enable-cryptsetup-reencrypt && \
+	make && \
+	make DESTDIR="$$(cd ../fs ; pwd)" install && \
+	cd ..
+
+
+device-mapper:
+
+
+libgcrypt:
+	wget 'ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-1.5.0.tar.bz2'
+	tar --bzip2 --get < libgcrypt-1.5.0.tar.bz2
+	cd libgcrypt-1.5.0 && \
+	./configure --prefix=/usr --disable-static --disable-padlock-support && \
+	make && \
+	make DESTDIR="$$(cd ../fs ; pwd)" install && \
+	cd ..
+
+
+removestuff:
+	rm -r fs/usr/include
+	rm -r fs/usr/share
 
 
 cpiolist:
