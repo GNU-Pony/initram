@@ -8,6 +8,6 @@ cpiolist
 .\#*
 *.bak
 
-/busybox-*
-/busybox-*/
+/*-*.tar*
+/*-*/
 

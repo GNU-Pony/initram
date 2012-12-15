@@ -198,9 +198,9 @@ util-linux:
 	cp "/usr/lib/libmount.so.1.1.0" fs/"usr/lib"
 	cp "/usr/lib/libuuid.so.1.3.0" fs/"usr/lib"
 
-	ln -s libblkid.so.1{,.1.0}
-	ln -s libmount.so.1{,.1.0}
-	ln -s libuuid.so.1{,.3.0}
+	ln -s libblkid.so.1.1.0 fs/"usr/lib/libblkid.so.1"
+	ln -s libmount.so.1.1.0 fs/"usr/lib/libmount.so.1"
+	ln -s libuuid.so.1.3.0 fs/"usr/lib/libuuid.so.1"
 
 
 popt:
