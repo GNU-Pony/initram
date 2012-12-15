@@ -339,8 +339,8 @@ libgcrypt:
 
 
 removestuff:
-	rm -r fs/usr/include
-	rm -r fs/usr/share
+	yes | rm -r fs/usr/include
+	yes | rm -r fs/usr/share
 
 
 cpiolist:
