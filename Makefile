@@ -2,7 +2,7 @@ BUSYBOX_VERSION = 1.20.2
 KMOD_VERSION = 12
 
 
-all: dirs linkdirs linkfiles touches programs removestuff cpiolist
+all: dirs linkdirs programs removestuff touches linkfiles cpiolist
 
 
 programs: busybox kmod util-linux popt glibc \
@@ -30,18 +30,22 @@ linkdirs:
 	if [ -e fs/"bin" ]; then  $(RM) fs/"bin";  fi
 	if [ -e fs/"lib" ]; then  $(RM) fs/"lib";  fi
 	if [ -e fs/"sbin" ]; then  $(RM) fs/"sbin";  fi
+	if [ -e fs/"usr/libexec" ]; then  $(RM) fs/"usr/libexec";  fi
 	if [ -e fs/"usr/sbin" ]; then  $(RM) fs/"usr/sbin";  fi
 	if [ -e fs/"usr/local/bin" ]; then  $(RM) fs/"usr/local/bin";  fi
 	if [ -e fs/"usr/local/lib" ]; then  $(RM) fs/"usr/local/lib";  fi
 	if [ -e fs/"usr/local/sbin" ]; then  $(RM) fs/"usr/local/sbin";  fi
+	if [ -e fs/"usr/local/libexec" ]; then  $(RM) fs/"usr/local/libexec";  fi
 
 	ln -s "usr/bin" fs/"bin"
 	ln -s "usr/lib" fs/"lib"
 	ln -s "usr/bin" fs/"sbin"
+	ln -s "lib" fs/"usr/libexec"
 	ln -s "bin" fs/"usr/sbin"
 	ln -s "../bin" fs/"usr/local/bin"
 	ln -s "../lib" fs/"usr/local/lib"
 	ln -s "../bin" fs/"usr/local/sbin"
+	ln -s "../libexec" fs/"usr/local/libexec"
 
 
 linkfiles:
@@ -51,7 +55,6 @@ linkfiles:
 
 
 touches:
-	touch fs/"etc/udev/udev.conf"
 	touch fs/"etc/fstab"
 	touch fs/"etc/initrd-release"
 
@@ -340,8 +343,17 @@ libgcrypt:
 
 
 removestuff:
-	yes | rm -r fs/usr/include
-	yes | rm -r fs/usr/share
+	yes | rm -r fs/"usr/include"
+	yes | rm -r fs/"usr/share"
+	yes | rm -r fs/"var"
+	yes | rm -r fs/"etc"
+	yes | rm fs/"usr/bin/"system*
+	yes | rm fs/"usr/bin/"*ctl
+	yes | rm -r fs/"usr/lib/"*system*
+	yes | rm fs/"usr/lib/"libgudev*
+	yes | rm fs/"usr/lib/"*.{a,la}
+	yes | rm fs/"usr/lib/"{binfmt,modules-load,tmpfiles,sysctl}.d
+	yes | rm fs/"usr/lib/"{girepository-1.0,pkgconfig,python*,security}
 
 
 cpiolist:
