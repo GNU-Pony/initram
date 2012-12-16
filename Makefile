@@ -7,7 +7,8 @@ all: dirs linkdirs linkfiles touches programs removestuff cpiolist
 
 programs: busybox kmod util-linux popt glibc \
 	  zlib libgpg-error e2fsprogs attr acl \
-	  cryptsetup device-mapper libgcrypt
+	  cryptsetup device-mapper libgcrypt \
+	  systemd
 
 
 dirs:
@@ -345,6 +346,21 @@ removestuff:
 
 cpiolist:
 	find $$(pwd)/fs | ./cpiolist.py $$(pwd)/fs > cpiolist
+
+
+systemd:
+	wget 'http://www.freedesktop.org/software/systemd/systemd-196.tar.xz'
+	tar --xz --get < systemd-196.tar.xz
+	cd systemd-196 && \
+	./configure --libexecdir=/usr/libexec \
+	            --localstatedir=/var \
+	            --sysconfdir=/etc \
+	            --enable-introspection \
+	            --disable-audit \
+	            --disable-ima && \
+	make && \
+	make DESTDIR="$$(cd ../fs ; pwd)" install && \
+	cd ..
 
 
 .PHONY: clean
