@@ -2,7 +2,7 @@ BUSYBOX_VERSION = 1.20.2
 KMOD_VERSION = 12
 
 
-all: dirs linkdirs programs removestuff touches linkfiles cpiolist
+all: dirs linkdirs programs removestuff touches linkfiles strip cpiolist
 
 
 programs: busybox kmod util-linux popt glibc \
@@ -45,13 +45,16 @@ linkdirs:
 	ln -s "../bin" fs/"usr/local/bin"
 	ln -s "../lib" fs/"usr/local/lib"
 	ln -s "../bin" fs/"usr/local/sbin"
-	ln -s "../libexec" fs/"usr/local/libexec"
+	ln -s "../lib" fs/"usr/local/libexec"
 
 
 linkfiles:
 	if [ -e fs/"etc/mtab" ]; then  $(RM) fs/"etc/mtab";  fi
 
 	ln -s "/proc/self/mounts" fs/"etc/mtab"
+
+	ln -s mkfs.ext4 fs/"usr/bin/mkfs.ext2"
+	ln -s mkfs.ext4 fs/"usr/bin/mkfs.ext3"
 
 
 touches:
@@ -277,7 +280,7 @@ attr:
 	tar --gzip --get < attr-2.4.46.src.tar.gz
 	cd attr-2.4.46 && \
 	export INSTALL_USER=root INSTALL_GROUP=root && \
-	./configure --prefix=/usr --libdir=/usr/lib --libexecdir=/usr/lib && \
+	./configure --prefix=/usr --libdir=/usr/lib --libexecdir=/usr/libexec && \
 	make && \
 	make DIST_ROOT="$$(cd ../fs ; pwd)" install install-lib install-dev && \
 	cd ..
@@ -288,7 +291,7 @@ acl:
 	tar --gzip --get < acl-2.2.51.src.tar.gz
 	cd acl-2.2.51 && \
 	export INSTALL_USER=root INSTALL_GROUP=root && \
-	./configure --prefix=/usr --libdir=/usr/lib --libexecdir=/usr/lib && \
+	./configure --prefix=/usr --libdir=/usr/lib --libexecdir=/usr/libexec && \
 	make && \
 	make DIST_ROOT="$$(cd ../fs ; pwd)" install install-lib install-dev && \
 	cd ..
@@ -343,17 +346,19 @@ libgcrypt:
 
 
 removestuff:
-	yes | rm -r fs/"usr/include"
-	yes | rm -r fs/"usr/share"
-	yes | rm -r fs/"var"
-	yes | rm -r fs/"etc"
-	yes | rm fs/"usr/bin/"system*
-	yes | rm fs/"usr/bin/"*ctl
-	yes | rm -r fs/"usr/lib/"*system*
-	yes | rm fs/"usr/lib/"libgudev*
-	yes | rm fs/"usr/lib/"*.{a,la}
-	yes | rm fs/"usr/lib/"{binfmt,modules-load,tmpfiles,sysctl}.d
-	yes | rm fs/"usr/lib/"{girepository-1.0,pkgconfig,python*,security}
+	yes | rm -r fs/"usr/include" || exit 0
+	yes | rm -r fs/"usr/share" || exit 0
+	yes | rm -r fs/"var" || exit 0
+
+	yes | rm fs/"usr/bin/"{badblocks,catchsegv,cryptsetup-reencrypt,debugfs,gpg*,*ctl} || exit 0
+	yes | rm fs/"usr/bin/"{e2{freefrag,image,label,undo},e4defrag,mkfs.ext{2,3,4dev}} || exit 0
+	yes | rm fs/"usr/bin/"{system*,iconv,fsck.*,mklost+found,resize2fs,memusage*} || exit 0
+
+	yes | rm -r fs/"usr/lib/"{girepository-1.0,pkgconfig,python*,security} || exit 0
+	yes | rm -r fs/"usr/lib/"{*.o,gconv,getconf,audit,*system*.libgudev*,*.a,*.la} || exit 0
+
+	yes | rm -r fs/"etc/"{binfmt,modules-load,tmpfiles,sysctl}.d || exit 0
+	yes | rm -r fs/"etc/"{bash_completion.d,dbus-1,ld.so.cache,mke2fs.conf,rpc,rpm} || exit 0
 
 
 cpiolist:
@@ -373,6 +378,10 @@ systemd:
 	make && \
 	make DESTDIR="$$(cd ../fs ; pwd)" install && \
 	cd ..
+
+
+strip:
+	find fs/usr/ | while read file; do strip -s "$$file"; done || exit 0
 
 
 .PHONY: clean
