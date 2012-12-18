@@ -43,9 +43,9 @@ filesystem:
 
 devices:
 	mknod --mode=0600 fs/dev/console c 5 1
-	mknod --mode=0600 fs/dev/null c 1 3
-	mknod --mode=0600 fs/dev/zero c 1 5
-	mknod --mode=0600 fs/dev/urandom c 1 9
+	mknod --mode=0666 fs/dev/null c 1 3
+	mknod --mode=0444 fs/dev/zero c 1 5
+	mknod --mode=0444 fs/dev/urandom c 1 9
 
 # steal library files from the current OS
 host-libraries:
