@@ -4,7 +4,7 @@ echo -e '\e[01;34mGNU/\e[35mPONY\e[21;39m'
 
 
 ## TEMPORARLY BORROWED FROM LINUX FROM SCRATCH,
-## but it thought klibc should generate it...
+## but I thought klibc should generate it...
 
 
 # Some of this was shamelessly stolen from 
