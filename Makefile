@@ -17,9 +17,6 @@ verify-is-root:
 cpiolist:
 	find $$(pwd)/fs | ./cpiolist.py $$(pwd)/fs > cpiolist
 
-	ln -s mkfs.ext4 fs/"usr/bin/mkfs.ext2"
-	ln -s mkfs.ext4 fs/"usr/bin/mkfs.ext3"
-
 
 .PHONY: clean
 clean:
