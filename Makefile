@@ -90,7 +90,11 @@ host-binaries:
 
 
 klibc: $(KLIBC) $(KLIBC)/linux
-	cp -r /usr/include/{linux,asm{,-generic}} "$(KLIBC)/linux/include"
+	mkdir .tmp
+	cp -r /usr/include/{linux,asm{,-generic}} .tmp
+	cp -r "$(KLIBC)/linux/include/"* .tmp
+	cp -r .tmp/* "$(KLIBC)/linux/include"
+	rm -r .tmp
 	export INITRAMFS=$$(pwd)/initramfs && \
 	export SCRIPTS=$$INITRAMFS/scripts && \
 	mkdir -p $$INITRAMFS && \
