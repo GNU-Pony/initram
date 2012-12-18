@@ -1,0 +1,107 @@
+#!/bin/bash
+
+echo -e '\e[01;34mGNU/\e[35mPONY\e[21;39m'
+
+
+## TEMPORARLY BORROWED FROM LINUX FROM SCRATCH,
+## but it thought klibc should generate it...
+
+
+# Some of this was shamelessly stolen from 
+#  http://wiki.suspend2.net/DistroAndHardwareSetup/LvmDmcryptHOWTO
+# Specifically, stolen from their /init, available here:
+#  http://www.disciplina.net/howto/initscript
+
+mount -t proc proc /proc
+CMDLINE=`cat /proc/cmdline`
+
+for param in $CMDLINE ; do
+    case "$param" in
+        root=*|init=*)
+            eval "$param"
+            ;;
+    esac
+done
+
+if [ -z "$root" ] ; then
+    echo "No root filesystem given to the kernel.  Append the"
+    echo "correct 'root=' boot option."
+    echo
+    echo "Dropping to a very minimal shell.  Reboot with"
+    echo "Ctrl-Alt-Delete."
+
+    exec /bin/bash
+fi
+
+if [ -z "$init" ] ; then
+    init=/sbin/init
+fi
+
+# Create the real root FS device node -- for now, this will only
+#  support IDE devices, and only hd[a-d]*.
+
+# Figure out the major number, and the "base" minor number (equal
+#  to the number after e.g. /dev/hda or /dev/hdb).
+case "$root" in
+	/dev/hd[ab]*)
+		MAJOR=3
+		MINOR=${root##/dev/hd[ab]}
+		;;
+	/dev/hd[cd]*)
+		MAJOR=22
+		MINOR=${root##/dev/hd[cd]}
+		;;
+esac
+
+if [ -z "$MAJOR" ] ; then
+	echo "Root filesystem not recognized, so the device node"
+	echo "cannot be created).  Append the correct 'root=' boot"
+	echo "option to the kernel.  Note that only /dev/hd[a-d]*"
+	echo "are supported yet.  You will have to modify init"
+	echo "before it will work with anything else."
+	echo
+	echo "Dropping to a very minimal shell.  Reboot with"
+	echo "Ctrl-Alt-Delete."
+
+	exec /bin/bash
+fi
+
+# Adjust the minor number by 64 if needed.  (Only needed for
+#  /dev/hdb and /dev/hdd.)
+case "$root" in
+	/dev/hd[bd]*)
+		MINOR=$(($MINOR + 64))
+		;;
+esac
+
+# Make the device file
+mknod $root b $MAJOR $MINOR
+
+# Figure out what filesystem the real root FS is using
+eval `fstype <$root`
+
+# If you need to hardcode FSTYPE, do it here, just before the test.
+
+if [ -z "$FSTYPE" -o "$FSTYPE" = "unknown" ] ; then
+	echo "Could not determine the FS type for the root filesystem."
+	echo "You should edit init to hardcode the FSTYPE variable,"
+	echo "and rebuild your initramfs."
+	echo
+	echo "Dropping to a very minimal shell.  Reboot with"
+	echo "Ctrl-Alt-Delete."
+
+	exec /bin/bash
+fi
+
+# Mount the real root FS
+mount -t $FSTYPE $root /new-root
+
+# Move /proc over.  The LFS bootscripts can handle it, and doing it
+#  this way means that we don't need to include any umount binary.
+mount -o move /proc /new-root/proc
+
+# last chance to fix stuff...
+#/bin/bash
+
+exec run-init /new-root $init "$@"
+
