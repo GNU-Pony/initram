@@ -154,8 +154,8 @@ fs-cleanup:
 	ln -sf . fs/usr
 
 strip:
-	find fs | xargs strip -s fs
+	find fs | xargs strip -s fs || true
 
 upx:
-	find fs | xargs upx --best fs
+	find fs | xargs upx --best fs || true
 
