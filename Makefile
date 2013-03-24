@@ -19,7 +19,7 @@ BSD_CPIO = y
 root=0
 
 
-all: verify-is-root prepare clean-fs system lnfix initcpio
+all: verify-is-root prepare clean-fs system lnfix hooks initcpio
 system: filesystem devices bin-lib fs/config fs/init
 bin-lib: packages fs-cleanup ld-linux strip upx
 
@@ -104,6 +104,9 @@ fs/config:
 	cp config fs/config
 	chmod 644 fs/config
 	chown '$(root):$(root)' fs/config
+
+hooks:
+	cp {keymap,udev} fs/hooks
 
 ld-linux:
 	root=fs && \
