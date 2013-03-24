@@ -85,6 +85,9 @@ filesystem:
 	ln -sf lib fs/libexec || true
 	ln -sf lib fs/usr/lib64 || true
 	ln -sf lib fs/lib64 || true
+	touch fs/etc/fstab
+	touch fs/etc/initrd-release
+	touch ln -sf /proc/self/mount fs/etc/mtab
 
 devices:
 #	mknod --mode=0600 fs/dev/console c 5 1
@@ -177,15 +180,15 @@ busybox:
 
 
 fs-cleanup:
-	rm fs/usr/sbin/udevd
-	mv fs/usr/lib/systemd/systemd-udevd fs/usr/sbin/udevd
+	rm fs/usr/sbin/udevd || true
+	mv fs/usr/lib/systemd/systemd-udevd fs/usr/sbin/udevd || true
 	rm -r fs/{var,etc/pam.d} || true
 	rm -r fs{/usr,}/{lib/pkgconfig,include,share,man,info} || true
 	rm -r fs/etc/{binfmt.d,dbus-1,modules-load.d,sysctl.d,systemd,tmpfiles.d,xdg} || true
 	rm -r fs{/usr,}/lib/{binfmt.d,girepository-*,modules-load.d,python*,security,locale} || true
 	rm -r fs{/usr,}/lib/{sysctl.d,systemd,tmpfiles.d,*.a,*.la,terminfo,lib.*,gconv,audit} || true
-	rm -r fs{/usr,}/lib/{getconf,*.o,pt_chown,libcind*,libdl*,libm*,libmemusage.*,libnsl*} || true
-	rm -r fs{/usr,}/lib/lib{systemd*,udev,gudev-*,nss_*,B*,S*,anl*,cprogile,resolve*,util*}.* || true
+	rm -r fs{/usr,}/lib/{getconf,*.o,pt_chown,libcind*,libdl*,libmemusage.*,libnsl*} || true
+	rm -r fs{/usr,}/lib/lib{systemd*,udev,gudev-*,nss_*,B*,S*,anl*,cprogile,m,resolve*,util*}.* || true
 	rm -r fs{/usr,}/sbin/{*ctl,kernel-install,systemd*} || true
 	rm -r fs{/usr,}/etc/{gai.conf,nscd.conf,locale.gen,rpc} || true
 	rm fs/usr/{bin,libexec,lib64}
