@@ -23,12 +23,12 @@ def main(root):
             mode = stat.st_mode
             mod = oct(mode)[-4:]
             
-            if os.path.isfile(location):
-                print("file %s %s %s %i %i" % (name, location, mod, uid, gid))
+            if os.path.islink(location):
+                print("slink %s %s %s %i %i" % (name, os.readlink(location), mod, uid, gid))
             elif os.path.isdir(location):
                 print("dir %s %s %i %i" % (name, mod, uid, gid))
-            elif os.path.islink(location):
-                print("slink %s %s %s %i %i" % (name, os.readlink(location), mod, uid, gid))
+            elif os.path.isfile(location):
+                print("file %s %s %s %i %i" % (name, location, mod, uid, gid))
             else:
                 t = oct(mode)[2:-4]
                 if t == '1':
