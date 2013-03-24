@@ -12,7 +12,7 @@ KLIBC = klibc-$(KLIBC_VERSION)
 root=0
 
 
-all: verify-is-root prepare clean-fs system cpiolist
+all: verify-is-root prepare clean-fs system lnfix cpiolist
 system: filesystem devices bin-lib fs/config fs/init
 bin-lib: packages fs-cleanup ld-linux strip upx
 
@@ -81,6 +81,14 @@ ld-linux:
 	arch="$$(echo $$arch | sed -e 's_ __g' -e 's/_/-/g' | cut -d = -f 2)" && \
 	ln -sf ld-$$ldversion.so $$root/lib/ld-linux-$$arch.so.$$ldmajor
 
+lnfix:
+	d="$$(pwd)/fs"; \
+	find fs | while read f; do if [ -L "$$f" ]; then \
+	    if [ "$$(readlink "$$f")" = "$$(realpath "$$f")" ]; then \
+	        p="$$(readlink "$$f" | sed -e "s#^$$d/#/#g")" && \
+	        rm "$$f" && ln -sf "$$p" "$$f"; \
+	    fi; \
+	fi; done
 
 
 # TODO: cannot get klibc to compile...
