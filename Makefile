@@ -38,6 +38,7 @@ clean-fs:
 
 
 filesystem:
+	mkdir -p fs/new_root
 	mkdir -p fs/sbin
 	mkdir -p fs/lib
 	mkdir -p fs/hooks
@@ -46,18 +47,21 @@ filesystem:
 	mkdir -p fs/dev
 	mkdir -p fs/sys
 	mkdir -p fs/run
+	mkdir -p fs/tmp
 	mkdir -p fs/usr/sbin
 	mkdir -p fs/usr/lib
 	ln -sf sbin fs/bin || true
 	ln -sf sbin fs/usr/bin || true
 	ln -sf lib fs/usr/libexec || true
 	ln -sf lib fs/libexec || true
+	ln -sf lib fs/usr/lib64 || true
+	ln -sf lib fs/lib64 || true
 
 devices:
-	mknod --mode=0600 fs/dev/console c 5 1
-	mknod --mode=0666 fs/dev/null c 1 3
-	mknod --mode=0666 fs/dev/zero c 1 5
-	mknod --mode=0666 fs/dev/urandom c 1 9
+#	mknod --mode=0600 fs/dev/console c 5 1
+#	mknod --mode=0666 fs/dev/null c 1 3
+#	mknod --mode=0666 fs/dev/zero c 1 5
+#	mknod --mode=0666 fs/dev/urandom c 1 9
 
 fs/init:
 	cp init fs/init
@@ -147,7 +151,7 @@ fs-cleanup:
 	rm -r fs{/usr,}/lib/lib{systemd*,udev,gudev-*,nss_*,B*,S*,anl*,cprogile,resolve*,util*}.* || true
 	rm -r fs{/usr,}/sbin/{*ctl,kernel-install,systemd*} || true
 	rm -r fs{/usr,}/etc/{gai.conf,nscd.conf,locale.gen,rpc} || true
-	rm fs/usr/{bin,libexec}
+	rm fs/usr/{bin,libexec,lib64}
 	mv fs/usr/lib/* fs/lib
 	mv fs/usr/sbin/* fs/sbin
 	rm -r fs/usr

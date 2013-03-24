@@ -24,7 +24,12 @@ def main(root):
             mod = oct(mode)[-4:]
             
             if os.path.islink(location):
-                print("slink %s %s %s %i %i" % (name, os.readlink(location), mod, uid, gid))
+                link = os.readlink(location)
+                if link.startswith(root):
+                    link = link[len(root):]
+                if not link.startswith("/"):
+                    link = "/" + link
+                print("slink %s %s %s %i %i" % (name, link, mod, uid, gid))
             elif os.path.isdir(location):
                 print("dir %s %s %i %i" % (name, mod, uid, gid))
             elif os.path.isfile(location):
