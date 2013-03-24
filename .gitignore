@@ -1,4 +1,5 @@
-/_/
+_/
+.hidden
 
 /fs/
 /initramfs/
@@ -11,6 +12,6 @@ cpiolist
 
 /*-*.tar*
 /*-*/
-/LVM2.*
-/LVM2.*/
+readline??-???
+bash??-???
 

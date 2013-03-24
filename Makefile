@@ -1,14 +1,25 @@
+LIVE_MEDIUM = ../live-medium
+
 KERNEL_SOURCE = $$(cd ../live-medium/linux-*/ ; pwd)
 KERNEL_MIRROR = https://ftp.kernel.org/pub/linux
 
 BUSYBOX_VERSION = 1.20.2
+GLIBC_VERSION = 2.17
+NCURSES_VERSION = 5.9
+READLINE_VERSION = 6.2.4
+SYSTEMD_VERSION = 198
+
 
 KLIBC_VERSION_MASTER = 2.0
 KLIBC_VERSION = $(KLIBC_VERSION_MASTER).2
 KLIBC = klibc-$(KLIBC_VERSION)
 
+root=0
+
 
 all: verify-is-root clean-fs system cpiolist
+system: filesystem devices bin-lib fs/config fs/init
+bin-lib: host-libraries klibc busybox fs-cleanup
 
 
 verify-is-root:
@@ -20,26 +31,25 @@ cpiolist:
 
 .PHONY: clean
 clean:
-	yes | rm -r fs cpiolist *-*/ *-*.tar* LVM2.* || exit 0
+	yes | rm -r fs cpiolist *-*/ *-*.tar.* || true
 
 .PHONY: clean-fs
 clean-fs:
-	yes | rm -r fs || exit 0
-
-
-system: filesystem devices bin-lib fs/init
-bin-lib: host-libraries host-binaries klibc busybox busybox-links
+	yes | rm -r fs || true
 
 
 filesystem:
-	mkdir -p fs/bin
+	mkdir -p fs/sbin
 	mkdir -p fs/lib
+	mkdir -p fs/hooks
+	mkdir -p fs/etc
 	mkdir -p fs/proc
-	mkdir -p fs/new-root
 	mkdir -p fs/dev
-	ln -s / fs/usr
-	ln -s / fs/local
-	ln -s /bin fs/bin
+	mkdir -p fs/sys
+	mkdir -p fs/run
+	ln -sf . fs/usr
+	ln -sf . fs/local
+	ln -sf sbin fs/bin
 
 devices:
 	mknod --mode=0600 fs/dev/console c 5 1
@@ -47,30 +57,23 @@ devices:
 	mknod --mode=0666 fs/dev/zero c 1 5
 	mknod --mode=0666 fs/dev/urandom c 1 9
 
+fs/%:
+	cp init fs/"$*"
+	chmod 755 fs/"$*"
+	chown '$(root):$(root)' fs/"$*"
+
 # steal library files from the current OS
 host-libraries:
 	for lib in \
 	    ld-linux.so.2 \
 	    libc.so.6 \
 	    libdl.so.2 \
-	    libhistory.so.5.0 \
+	    libhistory.so.6.2 \
 	    libncurses.so.5 \
 	    libreadline.so.6.2 \
 	; do \
 	    cp $$(realpath "/lib/$$lib") "fs/lib/$$lib"; \
 	done
-
-# steal binary files from the current OS
-host-binaries:
-	for bin in \
-	    bash \
-	    cat \
-	    mknod \
-	    mount \
-	; do \
-	    cp "$$(which "$$bin")" "fs/bin/$$bin"; \
-	done
-	ln -s /bin/bash "fs/bin/sh"
 
 
 #glibc:
@@ -112,33 +115,31 @@ $(KLIBC)/linux:
 	ln -s "$(KERNEL_SOURCE)" "$(KLIBC)/linux"
 
 
+# GPL
+BUSYBOX = busybox-$(BUSYBOX_VERSION)
 busybox:
-	wget "http://www.busybox.net/downloads/busybox-$(BUSYBOX_VERSION).tar.bz2"
-	tar --bzip2 --get < "busybox-$(BUSYBOX_VERSION).tar.bz2"
-	cp busybox.config "busybox-$(BUSYBOX_VERSION)/.config"
-	cd "busybox-$(BUSYBOX_VERSION)" && \
-	patch -Np1 < "../glibc-2.16.patch" && \
+	[ -f "$(BUSYBOX).tar.bz2" ] || \
+	wget "http://www.busybox.net/downloads/$(BUSYBOX).tar.bz2"
+	[ -d "$(BUSYBOX)" ] || \
+	tar --bzip2 --get < "$(BUSYBOX).tar.bz2"
+	flags="-Os -pipe -fno-strict-aliasing" && \
+	sed 's|^\(CONFIG_EXTRA_CFLAGS\)=.*|\1="'"$${flags}"'"|' \
+	    busybox.config > $(BUSYBOX)/.config
+	cd "$(BUSYBOX)" && \
+	patch -Np1 < ../glibc-2.16.patch && \
 	make menuconfig && \
 	make && \
 	cd ..
-	cp "busybox-$(BUSYBOX_VERSION)/busybox" fs/"bin"
+	cp $(BUSYBOX)/busybox fs/sbin
+	fs/sbin/busybox --install -s fs/sbin
 
-busybox-links: fs/bin/init
+include $(LIVE_MEDIUM)/pkgs/ncurses.mk
+include $(LIVE_MEDIUM)/pkgs/readline.mk
+include $(LIVE_MEDIUM)/pkgs/systemd.mk
 
-fs/bin/%:
-	ln -s busybox "$@"
+fs-cleanup:
+	rm -r fs/{var,usr/{include,share}} || true
+	rm -r fs/usr/lib/pkgconfig || true
+	rm -r fs/bin/{captoinfo,clear,info{cmp,tocap},ncursesw5-config,rest,tabs,tic,toe,tput,tset} || true
+	rm -r fs/etc/{binfmt.d,dbus-1,module-load.d,sysctl.d,systemd,tmpfiles.d,xdg} || true
 
-# [ [[ ash awk basname cat chgrp chmod own chroot clear cp cttyhack cur dd df
-# dirname dmesg du echo egrep env expr false free getopt grep halt head hexdump
-# ifconfig install ip ipaddr iplink iproute iprule iptunnel kbd_mode kill
-# killall less ln loadfont loadkmap losetup ls md5sum mkdir mkfifo mknod mktemp
-# mv nc netstat nslookup openvt passwd pgrep pidof ping ping6 poweroff printf
-# ps pwd readlink reboot rm rmdir rout sed seq setfont sh sha1sum sha256sum
-# sha512sum sleep sort stat strings tac tail telnet test tftp touch true umount
-# uname uniq uptime bi wc wget yes
-
-
-fs/init: 
-	cp init fs
-	chmod 755 fs/init
-	chown 'root:root' fs/init
