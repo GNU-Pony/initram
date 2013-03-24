@@ -6,6 +6,7 @@ _/
 /cpiolist
 /confs
 /patches
+/initramfs-linux
 
 *~
 \#*\#

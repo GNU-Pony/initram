@@ -1,6 +1,6 @@
 LIVE_MEDIUM = ../live-medium
 
-KERNEL_SOURCE = $$(cd ../live-medium/linux-*/ ; pwd)
+KERNEL_SOURCE = $$(cd $(LIVE_MEDIUM)/linux-*/ ; pwd)
 KERNEL_MIRROR = https://ftp.kernel.org/pub/linux
 
 BUSYBOX_VERSION = 1.20.2
@@ -9,10 +9,17 @@ KLIBC_VERSION_MASTER = 2.0
 KLIBC_VERSION = $(KLIBC_VERSION_MASTER).2
 KLIBC = klibc-$(KLIBC_VERSION)
 
+# first select is used, gnu required cpio and bsd required libarchive
+KERNEL_CPIO = n
+GNU_CPIO_OLD = n
+GNU_CPIO = n
+BSD_CPIO_OLD = n
+BSD_CPIO = y
+
 root=0
 
 
-all: verify-is-root prepare clean-fs system lnfix cpiolist
+all: verify-is-root prepare clean-fs system lnfix initcpio
 system: filesystem devices bin-lib fs/config fs/init
 bin-lib: packages fs-cleanup ld-linux strip upx
 
@@ -24,13 +31,35 @@ prepare:
 	ln -sf "$(LIVE_MEDIUM)"/confs confs
 	ln -sf "$(LIVE_MEDIUM)"/patches patches
 
+initcpio:
+	export LANG=C && \
+	if [ "$(KERNEL_CPIO)" = y ]; then \
+	    make -B cpiolist && \
+	    "$(KERNEL_SOURCE)"/usr/gen_init_cpio cpiolist > initramfs-linux; \
+	elif [ "$(GNU_CPIO_OLD)" = y ]; then \
+	    cd fs && (find . -print0 | \
+	    cpio --create --owner 0:0 --null --format oldc > ../initramfs-linux); \
+	elif [ "$(GNU_CPIO)" = y ]; then \
+	    cd fs && (find . -print0 | \
+	    cpio --create --owner 0:0 --null --format newc > ../initramfs-linux); \
+	elif [ "$(BSD_CPIO_OLD)" = y ]; then \
+	    cd fs && (find . -print0 | \
+	    bsdcpio --create --owner 0:0 --null --format oldc > ../initramfs-linux); \
+	elif [ "$(BSD_CPIO)" = y ]; then \
+	    cd fs && (find . -print0 | \
+	    bsdcpio --create --owner 0:0 --null --format newc > ../initramfs-linux); \
+	else \
+	    echo -e '\e[01;31mNo cpio creator is specified!\e[00m'; \
+	    exit 1; \
+	fi
+
 cpiolist:
 	find $$(pwd)/fs | ./cpiolist.py $$(pwd)/fs > cpiolist
 
 
 .PHONY: clean
 clean:
-	yes | rm -r fs cpiolist *-*/ *-*.tar.* {readline,bash}??-??? || true
+	yes | rm -r fs cpiolist initramfs-linux *-*/ *-*.tar.* {readline,bash}??-??? || true
 
 .PHONY: clean-fs
 clean-fs:
