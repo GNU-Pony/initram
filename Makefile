@@ -87,7 +87,7 @@ filesystem:
 	ln -sf lib fs/lib64 || true
 	touch fs/etc/fstab
 	touch fs/etc/initrd-release
-	touch ln -sf /proc/self/mount fs/etc/mtab
+	ln -sf /proc/self/mount fs/etc/mtab
 
 devices:
 #	mknod --mode=0600 fs/dev/console c 5 1
