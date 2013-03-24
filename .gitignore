@@ -3,12 +3,15 @@ _/
 
 /fs/
 /initramfs/
-cpiolist
+/cpiolist
+/confs
+/patches
 
 *~
 \#*\#
 .\#*
 *.bak
+*.swp
 
 /*-*.tar*
 /*-*/
