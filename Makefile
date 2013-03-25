@@ -21,7 +21,7 @@ root=0
 
 all: verify-is-root prepare clean-fs system lnfix hooks initcpio
 system: filesystem devices bin-lib fs/config fs/init
-bin-lib: packages fs-cleanup ld-linux strip upx
+bin-lib: packages fs-cleanup strip upx
 
 
 verify-is-root:
@@ -86,7 +86,6 @@ filesystem:
 	ln -sf lib fs/usr/lib64 || true
 	ln -sf lib fs/lib64 || true
 	touch fs/etc/fstab
-	touch fs/etc/initrd-release
 	ln -sf /proc/self/mount fs/etc/mtab
 
 devices:
@@ -107,14 +106,6 @@ fs/config:
 
 hooks:
 	cp {keymap,udev} fs/hooks
-
-ld-linux:
-	root=fs && \
-	ldversion="$$(echo $$root/lib/ld-*.so | sed -e 's|^'"$$root"'/lib/ld-||' -e 's|\.so$$||')" && \
-	ldmajor="$$(echo $$ldversion | cut -d . -f 1)" && \
-	arch="$$(grep -P '^ARCH( =|=)' < $(LIVE_MEDIUM)/config.mk)" && \
-	arch="$$(echo $$arch | sed -e 's_ __g' -e 's/_/-/g' | cut -d = -f 2)" && \
-	ln -sf ld-$$ldversion.so $$root/lib/ld-linux-$$arch.so.$$ldmajor
 
 lnfix:
 	d="$$(pwd)/fs"; \
@@ -150,13 +141,15 @@ DEVICELESS=y
 MNT=$(shell pwd)/fs
 include $(LIVE_MEDIUM)/versions.mk
 include $(LIVE_MEDIUM)/pkgs/util-linux.mk
-packages: util-linux-bin-clean
-util-linux-bin-clean:
-	rm fs/usr/bin/*
+packages: util-linux-unbin
+util-linux-unbin:
+	for f in  swapon setarch login kill blockdev su getopt mountpoint cal hwclock  \
+	          findfs readprofile rev fsck.minix flock blkid wall rtcwake pivot_root \
+	          logger scriptreplay fsck dmesg hexdump switch_root script sulogin mesg \
+	          mkswap ipcs mount fdformat more ionice mkfs.minix chrt eject setsid \
+	          fdisk ipcrm losetup umount swapoff \
+	;do rm fs_util_linux/{usr/,}{s,}bin/"$${f}" 2> /dev/null || true; done
 include $(LIVE_MEDIUM)/pkgs/glibc.mk
-packages: glibc-bin-clean
-glibc-bin-clean:
-	rm fs/usr/bin/*
 include $(LIVE_MEDIUM)/pkgs/systemd.mk
 
 
@@ -183,22 +176,32 @@ busybox:
 
 
 fs-cleanup:
-	rm fs/usr/sbin/udevd || true
-	mv fs/usr/lib/systemd/systemd-udevd fs/usr/sbin/udevd || true
-	rm -r fs/{var,etc/pam.d} || true
-	rm -r fs{/usr,}/{lib/pkgconfig,include,share,man,info} || true
-	rm -r fs/etc/{binfmt.d,dbus-1,modules-load.d,sysctl.d,systemd,tmpfiles.d,xdg} || true
-	rm -r fs{/usr,}/lib/{binfmt.d,girepository-*,modules-load.d,python*,security,locale} || true
-	rm -r fs{/usr,}/lib/{sysctl.d,systemd,tmpfiles.d,*.a,*.la,terminfo,lib.*,gconv,audit} || true
-	rm -r fs{/usr,}/lib/{getconf,*.o,pt_chown,libcind*,libdl*,libmemusage.*,libnsl*} || true
-	rm -r fs{/usr,}/lib/lib{systemd*,udev,gudev-*,nss_*,B*,S*,anl*,cprogile,m,resolve*,util*}.* || true
-	rm -r fs{/usr,}/sbin/{*ctl,kernel-install,systemd*} || true
-	rm -r fs{/usr,}/etc/{gai.conf,nscd.conf,locale.gen,rpc} || true
-	rm fs/usr/{bin,libexec,lib64}
-	mv fs/usr/lib/* fs/lib
-	mv fs/usr/sbin/* fs/sbin
-	rm -r fs/usr
+#merge
+	rm fs/usr/{bin,libexec,lib64} || true
+	rm fs/usr/sbin/ldconfig || true # symlink to fs/sbin/ldconfig
+	rm fs/sbin/udevadm || true # symlink to fs/usr/sbin/udevadm
+	mv fs/usr/sbin/* fs/sbin || true
+	mv fs/usr/lib/* fs/lib || true
+	rmdir fs/usr/{sbin,lib} || true
+	mv fs/usr/* fs || true
+	rmdir fs/usr || true
 	ln -sf . fs/usr
+	ln -sf . fs/local
+#unwanted categories
+	rm -r fs/{var,include,{share,lib}/pkgconfig} || true
+	rm -r fs/share/{info,man,doc,*-doc,*-completion} || true
+	rm -r fs/{share/{locale,i18n},lib/locale} || true
+	rm -r fs/lib/*.{a,la,o} || true
+#unwanted stuff
+#	rm -r fs/{etc/pam.d} || true
+#	rm -r fs/share || true
+#	rm -r fs/etc/{binfmt.d,dbus-1,modules-load.d,sysctl.d,systemd,tmpfiles.d,xdg} || true
+#	rm -r fs/lib/{binfmt.d,girepository-*,modules-load.d,python*,security,locale} || true
+#	rm -r fs/lib/{sysctl.d,systemd,tmpfiles.d,*.a,*.la,terminfo,lib.*,gconv,audit} || true
+#	rm -r fs/lib/{getconf,*.o,pt_chown,libcind*,libdl*,libmemusage.*,libnsl*} || true
+#	rm -r fs/lib/lib{systemd*,udev,gudev-*,nss_*,B*,S*,anl*,cprogile,m,resolve*,util*}.* || true
+#	rm -r fs/sbin/{*ctl,kernel-install,systemd*} || true
+#	rm -r fs/etc/{gai.conf,nscd.conf,locale.gen,rpc} || true
 
 strip:
 	find fs | xargs strip -s fs || true
