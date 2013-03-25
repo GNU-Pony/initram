@@ -20,7 +20,7 @@ root=0
 
 
 all: verify-is-root prepare clean-fs system lnfix hooks initcpio
-system: filesystem devices bin-lib fs/config fs/init
+system: filesystem devices bin-lib fs/init_functions fs/init
 bin-lib: packages fs-cleanup util-linux-rebin strip upx
 
 
@@ -99,10 +99,10 @@ fs/init:
 	chmod 755 fs/init
 	chown '$(root):$(root)' fs/init
 
-fs/config:
-	cp config fs/config
-	chmod 644 fs/config
-	chown '$(root):$(root)' fs/config
+fs/init_functions:
+	cp config fs/init_functions
+	chmod 644 fs/init_functions
+	chown '$(root):$(root)' fs/init_functions
 
 hooks:
 	cp {keymap,udev} fs/hooks
@@ -148,14 +148,24 @@ util-linux-unbin:
 	          logger scriptreplay fsck dmesg hexdump switch_root script sulogin mesg \
 	          mkswap ipcs mount fdformat more ionice mkfs.minix chrt eject setsid \
 	          fdisk ipcrm losetup umount swapoff \
-	;do rm fs/{usr/,}{s,}bin/"$${f}" 2> /dev/null || true; done
+	;do  rm fs/usr/sbin/"$${f}" 2> /dev/null || \
+	     rm fs/usr/bin/"$${f}" 2> /dev/null || \
+	     rm fs/sbin/"$${f}" 2> /dev/null || \
+	     rm fs/bin/"$${f}" 2> /dev/null || exit 1\
+	; done
 	for f in  fsck.minix blkid fsck switch_root \
 	;do mv fs/{usr/,}{s,}bin/"$${f}" fs/_"$${f}" || true; done
 util-linux-rebin:
 	for f in  fsck.minix blkid fsck switch_root \
-	;do mv fs/_"$${f}" fs/sbin/"$${f}" || exit1; done
+	;do mv fs/_"$${f}" fs/sbin/"$${f}" || true; done
 include $(LIVE_MEDIUM)/pkgs/glibc.mk
 include $(LIVE_MEDIUM)/pkgs/systemd.mk
+packages: systemd-mvbin
+systemd-mvbin:
+	(rm fs/usr/sbin/udevd && mv fs/usr/lib/systemd/systemd-udevd fs/usr/sbin/udevd) || \
+	(rm fs/usr/bin/udevd && mv fs/usr/lib/systemd/systemd-udevd fs/usr/bin/udevd) || \
+	(rm fs/sbin/udevd && mv fs/lib/systemd/systemd-udevd fs/sbin/udevd) || \
+	(rm fs/bin/udevd && mv fs/lib/systemd/systemd-udevd fs/bin/udevd)
 include $(LIVE_MEDIUM)/pkgs/kmod.mk
 include $(LIVE_MEDIUM)/pkgs/zlib.mk
 include $(LIVE_MEDIUM)/pkgs/acl.mk
@@ -201,18 +211,30 @@ fs-cleanup:
 #unwanted categories
 	rm -r fs/{var,include,{share,lib}/pkgconfig} || true
 	rm -r fs/share/{info,man,doc,*-doc,*-completion} || true
-	rm -r fs/{share/{locale,i18n},lib/locale} || true
+	rm -r fs/{share/{locale,i18n,licenses},lib/locale} || true
 	rm -r fs/lib/*.{a,la,o} || true
+	rm -r fs/sbin/mkfs* || true
 #unwanted stuff
-#	rm -r fs/{etc/pam.d} || true
-#	rm -r fs/share || true
-#	rm -r fs/etc/{binfmt.d,dbus-1,modules-load.d,sysctl.d,systemd,tmpfiles.d,xdg} || true
-#	rm -r fs/lib/{binfmt.d,girepository-*,modules-load.d,python*,security,locale} || true
-#	rm -r fs/lib/{sysctl.d,systemd,tmpfiles.d,*.a,*.la,terminfo,lib.*,gconv,audit} || true
-#	rm -r fs/lib/{getconf,*.o,pt_chown,libcind*,libdl*,libmemusage.*,libnsl*} || true
-#	rm -r fs/lib/lib{systemd*,udev,gudev-*,nss_*,B*,S*,anl*,cprogile,m,resolve*,util*}.* || true
-#	rm -r fs/sbin/{*ctl,kernel-install,systemd*} || true
-#	rm -r fs/etc/{gai.conf,nscd.conf,locale.gen,rpc} || true
+	rm -r fs/etc/{binfmt.d,dbus-1,modules-load.d,sysctl.d,systemd,tmpfiles.d,xdg} || true
+	rm -r fs/lib/{binfmt.d,girepository-*,modules-load.d,python*,security,locale} || true
+	rm -r fs/lib/{sysctl.d,systemd,tmpfiles.d,terminfo,lib.*,gconv,audit} || true
+	rm -r fs/lib/{getconf,pt_chown,libcind*,libmemusage.*,libnsl*} || true
+	rm -r fs/lib/lib{systemd*,gudev-*,nss_*,B*,S*,anl*,cprogile,m,resolve*,util*}.* || true
+	rm -r fs/sbin/{*ctl,kernel-install,systemd*,locale*,mklost+found,uuid*} || true
+	rm -r fs/etc/{gai.conf,nscd.conf,locale.gen,rpc,pam.d} || true
+	rm -r fs/sbin/{addpart,agetty,attr,badblocks,cfdisk,chacl,chattr,chcpu,chfn,setterm} || true
+	rm -r fs/sbin/{chsh,col,colcrt,colrm,column,compile_et,ctrlaltdel,cytune,debug*} || true
+	rm -r fs/sbin/{delpart,dmeventd,dmsetup,dumpe2fs,e2*,e4*,fallocate,filefrag,findmnt} || true
+	rm -r fs/sbin/{fsfreeze,fstrim,gencat,getconf,getent,getfacl,getfattr,i386,iconv*} || true
+	rm -r fs/sbin/{{ins,dep,ls,rm}mod,ld*,linux*,logsave,ls{attr,blk,cpu,locks},makedb} || true
+	rm -r fs/lib/lib{thread_db,ss,resolv,pcprofile,m-*,crypt*,cidn*}.so* || true
+	rm -r fs/lib/{e2initrd_helper,depmod.d,modprobe.d,lib{resolv,thread_db}-*} || true
+	rm -r fs/sbin/{catchsegv,ipcmk,isosize,look,mcookie,memusage*,mk_cmds,mk*fs,mtrace} || true
+	rm -r fs/sbin/{nscd,partx,pcprofiledump,pg,pldd,prlimit,raw,readprofile,renice} || true
+	rm -r fs/sbin/{resize*,rpcgen,setfa{cl,ttr},sfdisk,sln,sotruss,sprof,swaplabel} || true
+	rm -r fs/sbin/{tailf,taskset,tune2fs,tunelp,tzselect,ul,unshare,utmpdump,vigr,vipw} || true
+	rm -r fs/sbin/{whereis,wipefs,write,x86_64,xtrace,zdump,zic,rename,newgrp,namei} || true
+	rm -r fs/{share,etc/{*fs.conf,depmod.d,modprobe.d,udev},hooks/keymap} || true
 
 strip:
 	find fs | xargs strip -s fs || true
