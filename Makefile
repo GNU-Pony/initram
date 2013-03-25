@@ -21,7 +21,7 @@ root=0
 
 all: verify-is-root prepare clean-fs system lnfix hooks initcpio
 system: filesystem devices bin-lib fs/config fs/init
-bin-lib: packages fs-cleanup strip upx
+bin-lib: packages fs-cleanup util-linux-rebin strip upx
 
 
 verify-is-root:
@@ -148,9 +148,20 @@ util-linux-unbin:
 	          logger scriptreplay fsck dmesg hexdump switch_root script sulogin mesg \
 	          mkswap ipcs mount fdformat more ionice mkfs.minix chrt eject setsid \
 	          fdisk ipcrm losetup umount swapoff \
-	;do rm fs_util_linux/{usr/,}{s,}bin/"$${f}" 2> /dev/null || true; done
+	;do rm fs/{usr/,}{s,}bin/"$${f}" 2> /dev/null || true; done
+	for f in  fsck.minix blkid fsck switch_root \
+	;do mv fs/{usr/,}{s,}bin/"$${f}" fs/_"$${f}" || exit 1; done
+util-linux-rebin:
+	for f in  fsck.minix blkid fsck switch_root \
+	;do mv fs/_"$${f}" fs/sbin/"$${f}" || exit 1; done
 include $(LIVE_MEDIUM)/pkgs/glibc.mk
 include $(LIVE_MEDIUM)/pkgs/systemd.mk
+include $(LIVE_MEDIUM)/pkgs/kmod.mk
+include $(LIVE_MEDIUM)/pkgs/zlib.mk
+include $(LIVE_MEDIUM)/pkgs/acl.mk
+include $(LIVE_MEDIUM)/pkgs/attr.mk
+include $(LIVE_MEDIUM)/pkgs/device-mapper.mk
+include $(LIVE_MEDIUM)/pkgs/e2fsprogs.mk
 
 
 ## Do busybox last!
