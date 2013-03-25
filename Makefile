@@ -150,10 +150,10 @@ util-linux-unbin:
 	          fdisk ipcrm losetup umount swapoff \
 	;do rm fs/{usr/,}{s,}bin/"$${f}" 2> /dev/null || true; done
 	for f in  fsck.minix blkid fsck switch_root \
-	;do mv fs/{usr/,}{s,}bin/"$${f}" fs/_"$${f}" || exit 1; done
+	;do mv fs/{usr/,}{s,}bin/"$${f}" fs/_"$${f}" || true; done
 util-linux-rebin:
 	for f in  fsck.minix blkid fsck switch_root \
-	;do mv fs/_"$${f}" fs/sbin/"$${f}" || true; done
+	;do mv fs/_"$${f}" fs/sbin/"$${f}" || exit1; done
 include $(LIVE_MEDIUM)/pkgs/glibc.mk
 include $(LIVE_MEDIUM)/pkgs/systemd.mk
 include $(LIVE_MEDIUM)/pkgs/kmod.mk
