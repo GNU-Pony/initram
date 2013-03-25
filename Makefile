@@ -153,7 +153,7 @@ util-linux-unbin:
 	;do mv fs/{usr/,}{s,}bin/"$${f}" fs/_"$${f}" || exit 1; done
 util-linux-rebin:
 	for f in  fsck.minix blkid fsck switch_root \
-	;do mv fs/_"$${f}" fs/sbin/"$${f}" || exit 1; done
+	;do mv fs/_"$${f}" fs/sbin/"$${f}" || true; done
 include $(LIVE_MEDIUM)/pkgs/glibc.mk
 include $(LIVE_MEDIUM)/pkgs/systemd.mk
 include $(LIVE_MEDIUM)/pkgs/kmod.mk
