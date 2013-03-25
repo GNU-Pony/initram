@@ -100,12 +100,12 @@ fs/init:
 	chown '$(root):$(root)' fs/init
 
 fs/init_functions:
-	cp config fs/init_functions
+	cp init_functions fs/init_functions
 	chmod 644 fs/init_functions
 	chown '$(root):$(root)' fs/init_functions
 
 hooks:
-	cp {keymap,udev} fs/hooks
+	cp udev fs/hooks
 
 lnfix:
 	d="$$(pwd)/fs"; \
@@ -234,7 +234,7 @@ fs-cleanup:
 	rm -r fs/sbin/{resize*,rpcgen,setfa{cl,ttr},sfdisk,sln,sotruss,sprof,swaplabel} || true
 	rm -r fs/sbin/{tailf,taskset,tune2fs,tunelp,tzselect,ul,unshare,utmpdump,vigr,vipw} || true
 	rm -r fs/sbin/{whereis,wipefs,write,x86_64,xtrace,zdump,zic,rename,newgrp,namei} || true
-	rm -r fs/{share,etc/{*fs.conf,depmod.d,modprobe.d,udev},hooks/keymap} || true
+	rm -r fs/{share,etc/{*fs.conf,depmod.d,modprobe.d,udev}} || true
 
 strip:
 	find fs | xargs strip -s fs || true
