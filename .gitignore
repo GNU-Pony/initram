@@ -8,6 +8,7 @@ _/
 /confs
 /patches
 /initramfs-linux
+/built
 
 *~
 \#*\#

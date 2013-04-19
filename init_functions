@@ -247,11 +247,10 @@ default_mount_handler() {
     fi
 
     msg ":: mounting '$root' on real root"
-    if ! mount ${fstype:+-t $fstype} -o ${rwopt:-ro}${rootflags:+,$rootflags} "$root" "$1"; then
+    if ! mount ${fstype:+-t $fstype} -o ${rwopt:-rw}${rootflags:+,$rootflags} "$root" "$1"; then
         echo "You are now being dropped into an emergency shell."
         launch_interactive_shell
         msg "Trying to continue (this will most likely fail) ..."
     fi
 }
 
-# vim: set ft=sh ts=4 sw=4 et:
