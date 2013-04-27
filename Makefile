@@ -99,8 +99,8 @@ busybox:
 	flags="-Os -pipe -fno-strict-aliasing" && \
 	sed 's|^\(CONFIG_EXTRA_CFLAGS\)=.*|\1="'"$${flags}"'"|' \
 	    busybox-etc/busybox.config > $(BUSYBOX)/.config
+	-cd "$(BUSYBOX)" && patch -Np1 < ../busybox-etc/glibc-2.16.patch
 	cd "$(BUSYBOX)" && \
-	patch -Np1 < ../busybox-etc/glibc-2.16.patch && \
 	make menuconfig && \
 	make && \
 	cd ..
