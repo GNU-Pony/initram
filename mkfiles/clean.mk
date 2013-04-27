@@ -9,8 +9,8 @@ fs-cleanup:
 	-rmdir fs/usr/{sbin,lib}
 	-mv fs/usr/* fs
 	-rmdir fs/usr
-	ln -sf . fs/usr
-	ln -sf . fs/local
+	-ln -sf . fs/usr
+	-ln -sf . fs/local
 #unwanted categories
 	-rm -r fs/{var,include,{share,lib}/pkgconfig}
 	-rm -r fs/share/{info,man,doc,*-doc,*-completion}
