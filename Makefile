@@ -13,6 +13,7 @@ all: verify-is-root clean-fs system lnfix hooks initcpio
 system: filesystem packages fs-cleanup trim init-script
 .PHONY: all system
 
+
 .PHONY: filesystem
 filesystem:
 	mkdir -p fs/new_root
@@ -54,10 +55,6 @@ packages:
 	make util-linux-unbin
 	cd fs && tar --get --xz < $(LIVE_MEDIUM)/pkgs/glibc.pkg.tar.xz
 	cd fs && tar --get --xz < $(LIVE_MEDIUM)/pkgs/systemd.pkg.tar.xz
-	(rm fs/usr/sbin/udevd && mv fs/usr/lib/systemd/systemd-udevd fs/usr/sbin/udevd) || \
-	(rm fs/usr/bin/udevd && mv fs/usr/lib/systemd/systemd-udevd fs/usr/bin/udevd) || \
-	(rm fs/sbin/udevd && mv fs/lib/systemd/systemd-udevd fs/sbin/udevd) || \
-	(rm fs/bin/udevd && mv fs/lib/systemd/systemd-udevd fs/bin/udevd)
 	cd fs && tar --get --xz < $(LIVE_MEDIUM)/pkgs/kmod.pkg.tar.xz
 	cd fs && tar --get --xz < $(LIVE_MEDIUM)/pkgs/zlib.pkg.tar.xz
 	cd fs && tar --get --xz < $(LIVE_MEDIUM)/pkgs/acl.pkg.tar.xz
