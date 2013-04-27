@@ -19,3 +19,8 @@ BSD_CPIO = y
 # Root user and group ID
 root=0
 
+
+# Check that the user is root
+verify-is-root:
+	[ $$UID = 0 ]
+

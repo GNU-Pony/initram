@@ -1,40 +1,14 @@
 BUSYBOX_VERSION = 1.20.2
 
 include mkfiles/auxiliary.mk
+include mkfiles/trim.mk
+include mkfiles/clean.mk
+include mkfiles/sources.mk
+include mkfiles/initramfs.mk
 
 
 all: verify-is-root clean-fs system lnfix hooks initcpio
-system: filesystem devices bin-lib fs/init_functions fs/init
-bin-lib: packages fs-cleanup util-linux-rebin strip upx
-
-
-verify-is-root:
-	[ $$UID = 0 ]
-
-initcpio:
-	export LANG=C && \
-	if [ "$(KERNEL_CPIO)" = y ]; then \
-	    make -B cpiolist && \
-	    "$(KERNEL_SOURCE)"/usr/gen_init_cpio cpiolist > initramfs-linux; \
-	elif [ "$(GNU_CPIO_OLD)" = y ]; then \
-	    cd fs && (find . -print0 | \
-	    cpio --create --owner 0:0 --null --format oldc > ../initramfs-linux); \
-	elif [ "$(GNU_CPIO)" = y ]; then \
-	    cd fs && (find . -print0 | \
-	    cpio --create --owner 0:0 --null --format newc > ../initramfs-linux); \
-	elif [ "$(BSD_CPIO_OLD)" = y ]; then \
-	    cd fs && (find . -print0 | \
-	    bsdcpio --create --owner 0:0 --null --format oldc > ../initramfs-linux); \
-	elif [ "$(BSD_CPIO)" = y ]; then \
-	    cd fs && (find . -print0 | \
-	    bsdcpio --create --owner 0:0 --null --format newc > ../initramfs-linux); \
-	else \
-	    echo -e '\e[01;31mNo cpio creator is specified!\e[00m'; \
-	    exit 1; \
-	fi
-
-cpiolist:
-	find $$(pwd)/fs | tools/cpiolist.py $$(pwd)/fs > cpiolist
+system: filesystem packages fs-cleanup trim init-script
 
 
 filesystem:
@@ -58,25 +32,6 @@ filesystem:
 	-ln -sf lib fs/lib64
 	touch fs/etc/fstab
 	ln -sf /proc/self/mount fs/etc/mtab
-
-devices:
-#	mknod --mode=0600 fs/dev/console c 5 1
-#	mknod --mode=0666 fs/dev/null c 1 3
-#	mknod --mode=0666 fs/dev/zero c 1 5
-#	mknod --mode=0666 fs/dev/urandom c 1 9
-
-fs/init:
-	cp src/init fs/init
-	chmod 755 fs/init
-	chown '$(root):$(root)' fs/init
-
-fs/init_functions:
-	cp src/init_functions fs/init_functions
-	chmod 644 fs/init_functions
-	chown '$(root):$(root)' fs/init_functions
-
-hooks:
-	cp src/udev fs/hooks
 
 lnfix:
 	d="$$(pwd)/fs"; \
@@ -147,8 +102,4 @@ busybox:
 	cd ..
 	cp $(BUSYBOX)/busybox fs/sbin
 	fs/sbin/busybox --install -s fs/sbin
-
-
-include mkfiles/trim.mk
-include mkfiles/clean.mk
 
