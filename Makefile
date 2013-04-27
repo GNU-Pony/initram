@@ -1,9 +1,5 @@
 BUSYBOX_VERSION = 1.20.2
 
-KLIBC_VERSION_MASTER = 2.0
-KLIBC_VERSION = $(KLIBC_VERSION_MASTER).2
-KLIBC = klibc-$(KLIBC_VERSION)
-
 include mkfiles/auxiliary.mk
 
 
@@ -91,24 +87,6 @@ lnfix:
 	    fi; \
 	fi; done
 
-
-# TODO: cannot get klibc to compile...
-klibc: $(KLIBC) $(KLIBC)/linux
-	export INITRAMFS=$(shell pwd)/initramfs && \
-	export SCRIPTS=$$INITRAMFS/scripts && \
-	mkdir -p $$INITRAMFS && \
-	make -C "$(KLIBC)" SUBDIRS=utils
-	cp "$(KLIBC)/usr/kinit/fstype/static/fstype" fs/bin
-	cp "$(KLIBC)/usr/kinit/run-init/static/run-init" fs/bin
-
-$(KLIBC).tar.xz:
-	wget '$(KERNEL_MIRROR)/libs/klibc/$(KLIBC_VERSION_MASTER)/$(KLIBC).tar.xz'
-
-$(KLIBC): $(KLIBC).tar.xz
-	tar --xz --get < "$(KLIBC).tar.xz"
-
-$(KLIBC)/linux:
-	ln -sf "$(KERNEL_SOURCE)" "$(KLIBC)/linux"
 
 
 DEVICE=
