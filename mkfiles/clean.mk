@@ -42,7 +42,7 @@ fs-cleanup:
 
 .PHONY: clean
 clean:
-	-yes | rm -r fs cpiolist initramfs-linux *-*/ *-*.tar.* {readline,bash}??-???
+	-yes | rm -r fs cpiolist initramfs-linux *-*.*/ *-*.tar.*
 
 
 .PHONY: clean-fs
