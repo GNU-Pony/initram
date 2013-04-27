@@ -43,50 +43,27 @@ lnfix:
 	fi; done
 
 
-
-DEVICE=
-DEVICELESS=y
-MNT=$(shell pwd)/fs
-include $(LIVE_MEDIUM)/versions.mk
-include $(LIVE_MEDIUM)/pkgs/util-linux.mk
-packages: util-linux-unbin
-util-linux-unbin:
-	for f in  swapon setarch login kill blockdev su getopt mountpoint cal hwclock  \
-	          findfs readprofile rev fsck.minix flock blkid wall rtcwake pivot_root \
-	          logger scriptreplay fsck dmesg hexdump switch_root script sulogin mesg \
-	          mkswap ipcs mount fdformat more ionice mkfs.minix chrt eject setsid \
-	          fdisk ipcrm losetup umount swapoff \
-	;do  rm fs/usr/sbin/"$${f}" 2> /dev/null || \
-	     rm fs/usr/bin/"$${f}" 2> /dev/null || \
-	     rm fs/sbin/"$${f}" 2> /dev/null || \
-	     rm fs/bin/"$${f}" 2> /dev/null || exit 1\
-	; done
-	for f in  fsck.minix blkid fsck switch_root \
-	;do mv fs/{usr/,}{s,}bin/"$${f}" fs/_"$${f}" || true; done
-util-linux-rebin:
-	for f in  fsck.minix blkid fsck switch_root \
-	;do mv fs/_"$${f}" fs/sbin/"$${f}" || true; done
-include $(LIVE_MEDIUM)/pkgs/glibc.mk
-include $(LIVE_MEDIUM)/pkgs/systemd.mk
-packages: systemd-mvbin
-systemd-mvbin:
+packages:
+	cd fs && tar --get --xz < $(LIVE_MEDIUM)/pkgs/util-linux.pkg.tar.xz
+	make util-linux-unbin
+	cd fs && tar --get --xz < $(LIVE_MEDIUM)/pkgs/glibc.pkg.tar.xz
+	cd fs && tar --get --xz < $(LIVE_MEDIUM)/pkgs/systemd.pkg.tar.xz
 	(rm fs/usr/sbin/udevd && mv fs/usr/lib/systemd/systemd-udevd fs/usr/sbin/udevd) || \
 	(rm fs/usr/bin/udevd && mv fs/usr/lib/systemd/systemd-udevd fs/usr/bin/udevd) || \
 	(rm fs/sbin/udevd && mv fs/lib/systemd/systemd-udevd fs/sbin/udevd) || \
 	(rm fs/bin/udevd && mv fs/lib/systemd/systemd-udevd fs/bin/udevd)
-include $(LIVE_MEDIUM)/pkgs/kmod.mk
-include $(LIVE_MEDIUM)/pkgs/zlib.mk
-include $(LIVE_MEDIUM)/pkgs/acl.mk
-include $(LIVE_MEDIUM)/pkgs/attr.mk
-include $(LIVE_MEDIUM)/pkgs/device-mapper.mk
-include $(LIVE_MEDIUM)/pkgs/e2fsprogs.mk
+	cd fs && tar --get --xz < $(LIVE_MEDIUM)/pkgs/kmod.pkg.tar.xz
+	cd fs && tar --get --xz < $(LIVE_MEDIUM)/pkgs/zlib.pkg.tar.xz
+	cd fs && tar --get --xz < $(LIVE_MEDIUM)/pkgs/acl.pkg.tar.xz
+	cd fs && tar --get --xz < $(LIVE_MEDIUM)/pkgs/attr.pkg.tar.xz
+	cd fs && tar --get --xz < $(LIVE_MEDIUM)/pkgs/device-mapper.pkg.tar.xz
+	cd fs && tar --get --xz < $(LIVE_MEDIUM)/pkgs/e2fsprogs.pkg.tar.xz
+	make util-linux-rebin
+	make busybox
 
-
-## Do busybox last!
 
 # GPL
 BUSYBOX = busybox-$(BUSYBOX_VERSION)
-packages: busybox
 busybox:
 	[ -f "$(BUSYBOX).tar.bz2" ] || \
 	wget "http://www.busybox.net/downloads/$(BUSYBOX).tar.bz2"
