@@ -1,5 +1,7 @@
 BUSYBOX_VERSION = 1.20.2
 
+default: all
+
 include mkfiles/auxiliary.mk
 include mkfiles/trim.mk
 include mkfiles/clean.mk
