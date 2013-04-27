@@ -186,9 +186,9 @@ busybox:
 	tar --bzip2 --get < "$(BUSYBOX).tar.bz2"
 	flags="-Os -pipe -fno-strict-aliasing" && \
 	sed 's|^\(CONFIG_EXTRA_CFLAGS\)=.*|\1="'"$${flags}"'"|' \
-	    busybox.config > $(BUSYBOX)/.config
+	    busybox-etc/busybox.config > $(BUSYBOX)/.config
 	cd "$(BUSYBOX)" && \
-	patch -Np1 < ../glibc-2.16.patch && \
+	patch -Np1 < ../busybox-etc/glibc-2.16.patch && \
 	make menuconfig && \
 	make && \
 	cd ..
