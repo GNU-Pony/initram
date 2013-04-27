@@ -50,12 +50,12 @@ filesystem:
 	mkdir -p fs/tmp
 	mkdir -p fs/usr/sbin
 	mkdir -p fs/usr/lib
-	ln -sf sbin fs/bin || true
-	ln -sf sbin fs/usr/bin || true
-	ln -sf lib fs/usr/libexec || true
-	ln -sf lib fs/libexec || true
-	ln -sf lib fs/usr/lib64 || true
-	ln -sf lib fs/lib64 || true
+	-ln -sf sbin fs/bin
+	-ln -sf sbin fs/usr/bin
+	-ln -sf lib fs/usr/libexec
+	-ln -sf lib fs/libexec
+	-ln -sf lib fs/usr/lib64
+	-ln -sf lib fs/lib64
 	touch fs/etc/fstab
 	ln -sf /proc/self/mount fs/etc/mtab
 
