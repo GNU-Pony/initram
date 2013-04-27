@@ -54,7 +54,7 @@ initcpio:
 	fi
 
 cpiolist:
-	find $$(pwd)/fs | ./cpiolist.py $$(pwd)/fs > cpiolist
+	find $$(pwd)/fs | tools/cpiolist.py $$(pwd)/fs > cpiolist
 
 
 .PHONY: clean
