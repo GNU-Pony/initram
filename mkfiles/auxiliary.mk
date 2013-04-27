@@ -1,8 +1,8 @@
 # GNU/Pony live-medium directory
-LIVE_MEDIUM = ../live-medium
+LIVE_MEDIUM = $(shell cd ../live-medium ; pwd)
 
 # Kernel source
-KERNEL_SOURCE = $$(cd $(LIVE_MEDIUM)/linux-*/ ; pwd)
+KERNEL_SOURCE = $(shell cd $(LIVE_MEDIUM)/linux-*/ ; pwd)
 
 # Kernel mirror
 KERNEL_MIRROR = https://ftp.kernel.org/pub/linux
