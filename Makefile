@@ -95,17 +95,17 @@ devices:
 #	mknod --mode=0666 fs/dev/urandom c 1 9
 
 fs/init:
-	cp init fs/init
+	cp src/init fs/init
 	chmod 755 fs/init
 	chown '$(root):$(root)' fs/init
 
 fs/init_functions:
-	cp init_functions fs/init_functions
+	cp src/init_functions fs/init_functions
 	chmod 644 fs/init_functions
 	chown '$(root):$(root)' fs/init_functions
 
 hooks:
-	cp udev fs/hooks
+	cp src/udev fs/hooks
 
 lnfix:
 	d="$$(pwd)/fs"; \
