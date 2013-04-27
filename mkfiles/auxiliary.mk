@@ -21,6 +21,7 @@ root=0
 
 
 # Check that the user is root
+.PHONY: verify-is-root
 verify-is-root:
 	[ $$UID = 0 ]
 

@@ -1,3 +1,4 @@
+.PHONY: initcpio
 initcpio:
 	export LANG=C && \
 	if [ "$(KERNEL_CPIO)" = y ]; then \
@@ -20,6 +21,8 @@ initcpio:
 	    exit 1; \
 	fi
 
+
+.PHONY: cpiolist
 cpiolist:
 	find $$(pwd)/fs | tools/cpiolist.py $$(pwd)/fs > cpiolist
 
