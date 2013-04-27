@@ -9,8 +9,9 @@ include mkfiles/initramfs.mk
 
 all: verify-is-root clean-fs system lnfix hooks initcpio
 system: filesystem packages fs-cleanup trim init-script
+.PHONY: all system
 
-
+.PHONY: filesystem
 filesystem:
 	mkdir -p fs/new_root
 	mkdir -p fs/sbin
@@ -33,6 +34,8 @@ filesystem:
 	touch fs/etc/fstab
 	ln -sf /proc/self/mount fs/etc/mtab
 
+
+.PHONY: lnfix
 lnfix:
 	d="$$(pwd)/fs"; \
 	find fs | while read f; do if [ -L "$$f" ]; then \
@@ -43,6 +46,7 @@ lnfix:
 	fi; done
 
 
+.PHONY: packages
 packages:
 	cd fs && tar --get --xz < $(LIVE_MEDIUM)/pkgs/util-linux.pkg.tar.xz
 	make util-linux-unbin
@@ -62,8 +66,32 @@ packages:
 	make busybox
 
 
+.PHONY: util-linux-unbin
+util-linux-unbin:
+	for f in  swapon setarch login kill blockdev su getopt mountpoint cal hwclock  \
+	          findfs readprofile rev fsck.minix flock blkid wall rtcwake pivot_root \
+	          logger scriptreplay fsck dmesg hexdump switch_root script sulogin mesg \
+	          mkswap ipcs mount fdformat more ionice mkfs.minix chrt eject setsid \
+	          fdisk ipcrm losetup umount swapoff \
+	;do  rm fs/usr/sbin/"$${f}" 2> /dev/null || \
+	     rm fs/usr/bin/"$${f}" 2> /dev/null || \
+	     rm fs/sbin/"$${f}" 2> /dev/null || \
+	     rm fs/bin/"$${f}" 2> /dev/null || exit 1\
+	; done
+	for f in  fsck.minix blkid fsck switch_root \
+	;do mv fs/{usr/,}{s,}bin/"$${f}" fs/_"$${f}" || true; done
+
+
+.PHONY: util-linux-rebin
+util-linux-rebin:
+	for f in  fsck.minix blkid fsck switch_root \
+	;do mv fs/_"$${f}" fs/sbin/"$${f}" || true; done
+
+
+
 # GPL
 BUSYBOX = busybox-$(BUSYBOX_VERSION)
+.PHONY: busybox
 busybox:
 	[ -f "$(BUSYBOX).tar.bz2" ] || \
 	wget "http://www.busybox.net/downloads/$(BUSYBOX).tar.bz2"
