@@ -66,12 +66,12 @@ packages:
 
 .PHONY: util-linux-unbin
 util-linux-unbin:
-	for f in  swapon setarch login kill blockdev su getopt mountpoint cal hwclock  \
-	          findfs readprofile rev fsck.minix flock blkid wall rtcwake pivot_root \
-	          logger scriptreplay fsck dmesg hexdump switch_root script sulogin mesg \
-	          mkswap ipcs mount fdformat more ionice mkfs.minix chrt eject setsid \
-	          fdisk ipcrm losetup umount swapoff \
-	;do  rm fs/bin/"$${f}" 2> /dev/null || exit 1\
+	for f in  swapon setarch login kill blockdev su getopt mountpoint cal   \
+	          hwclock findfs readprofile rev flock wall rtcwake pivot_root  \
+	          logger scriptreplay dmesg hexdump switch_root  sulogin mesg   \
+	          mkswap ipcs mount fdformat more ionice mkfs.minix chrt eject  \
+	          setsid fdisk ipcrm losetup umount swapoff                     \
+	;do  rm fs/bin/"$${f}" 2> /dev/null || exit 1                           \
 	; done
 	for f in  fsck.minix blkid fsck switch_root \
 	;do mv fs/bin/"$${f}" fs/_"$${f}" || true; done
