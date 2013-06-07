@@ -13,7 +13,7 @@ fs/init_%: src/init_%
 	chown '$(root):$(root)' "$@"
 
 
-hooks: fs/hooks
-fs/hooks: src/udev
+hooks: $(foreach HOOK, $(HOOKS), fs/hooks/$(HOOK))
+fs/hooks/%: src/%s
 	cp "$<" "$@"
 
