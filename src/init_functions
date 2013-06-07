@@ -1,3 +1,4 @@
+#!/usr/bin/ash
 # This file contains common functions used in init and in hooks
 
 msg () {

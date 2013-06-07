@@ -1,4 +1,4 @@
-init-script: fs/init_functions fs/init
+init-script: fs/init_functions fs/init fs/init_head
 
 
 fs/init: src/init
@@ -7,7 +7,7 @@ fs/init: src/init
 	chown '$(root):$(root)' "$@"
 
 
-fs/init_functions: src/init_functions
+fs/init_%: src/init_%
 	cp "$<" "$@"
 	chmod 644 "$@"
 	chown '$(root):$(root)' "$@"
