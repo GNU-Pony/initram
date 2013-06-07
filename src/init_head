@@ -1,13 +1,16 @@
 #!/usr/bin/ash
 
 # set colour palette
-echo -en '\e]P0000000\e]P1CD656C\e]P232A679\e]P3CCAD47\e]P42495BE\e]P5A46EB0\e]P600A09F\e]P7D3D7CF\e]P8555753\e]P9EB5E6A\e]PA0EC287\e]PBF2CA38\e]PC00ACE0\e]PDC473D1\e]PE00C3C7\e]PFEEEEEE'
+_COLOUR_PALETTE='\e]P0000000\e]P1CD656C\e]P232A679\e]P3CCAD47\e]P42495BE\e]P5A46EB0\e]P600A09F\e]P7D3D7CF\e]P8555753\e]P9EB5E6A\e]PA0EC287\e]PBF2CA38\e]PC00ACE0\e]PDC473D1\e]PE00C3C7\e]PFEEEEEE'
 
-# set cursour style to full block
-echo -en '\e[?8c'
+# set cursor style to full block
+_CURSOR='\e[?8c'
 
 # echo "GNU/PONY" in colour
-echo -e '\e[01;34mGNU/\e[35mPONY\e[21;39m'
+_MESSAGE='\e[01;34mGNU/\e[35mPONY\e[21;39m'
+
+# -e is implied and -n cannot be used in echo
+echo "${_COLOUR_PALETTE}${_CURSOR}${_MESSAGE}"
 
 
 EARLYHOOKS="udev"

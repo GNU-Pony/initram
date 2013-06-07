@@ -1,10 +1,10 @@
 .PHONY: trim
-trim: strip upx
+trim: #strip upx
 
 
 .PHONY: strip
 strip:
-	-find fs | xargs strip -s
+	-find fs/bin | xargs strip -s
 
 
 .PHONY: upx

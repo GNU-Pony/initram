@@ -1,16 +1,5 @@
 .PHONY: fs-cleanup
 fs-cleanup:
-#merge
-	-rm fs/usr/{bin,libexec,lib64}
-	-rm fs/usr/sbin/ldconfig # symlink to fs/sbin/ldconfig
-	-rm fs/sbin/udevadm # symlink to fs/usr/sbin/udevadm
-	-mv fs/usr/sbin/* fs/sbin
-	-mv fs/usr/lib/* fs/lib
-	-rmdir fs/usr/{sbin,lib}
-	-mv fs/usr/* fs
-	-rmdir fs/usr
-	-ln -sf . fs/usr
-	-ln -sf . fs/local
 #unwanted categories
 	-rm -r fs/{var,include,{share,lib}/pkgconfig}
 	-rm -r fs/share/{info,man,doc,*-doc,*-completion}
@@ -29,7 +18,7 @@ fs-cleanup:
 	-rm -r fs/sbin/{chsh,col,colcrt,colrm,column,compile_et,ctrlaltdel,cytune,debug*}
 	-rm -r fs/sbin/{delpart,dmeventd,dmsetup,dumpe2fs,e2*,e4*,fallocate,filefrag,findmnt}
 	-rm -r fs/sbin/{fsfreeze,fstrim,gencat,getconf,getent,getfacl,getfattr,i386,iconv*}
-	-rm -r fs/sbin/{{ins,dep,ls,rm}mod,ld*,linux*,logsave,ls{attr,blk,cpu,locks},makedb}
+	-rm -r fs/sbin/{{ins,dep,ls,rm}mod,linux*,logsave,ls{attr,blk,cpu,locks},makedb}
 	-rm -r fs/lib/lib{thread_db,ss,resolv,pcprofile,m-*,crypt*,cidn*}.so*
 	-rm -r fs/lib/{e2initrd_helper,depmod.d,modprobe.d,lib{resolv,thread_db}-*}
 	-rm -r fs/sbin/{catchsegv,ipcmk,isosize,look,mcookie,memusage*,mk_cmds,mk*fs,mtrace}
