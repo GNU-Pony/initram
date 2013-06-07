@@ -1,5 +1,7 @@
 BUSYBOX_VERSION = 1.20.2
 
+HOOKS = udev
+
 default: all
 
 include mkfiles/auxiliary.mk
@@ -7,8 +9,6 @@ include mkfiles/trim.mk
 include mkfiles/clean.mk
 include mkfiles/sources.mk
 include mkfiles/initramfs.mk
-
-HOOKS = udev
 
 all: verify-is-root clean-fs system lnfix hooks initcpio
 system: filesystem packages fs-cleanup trim init-script

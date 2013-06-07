@@ -14,6 +14,6 @@ fs/init_%: src/init_%
 
 
 hooks: $(foreach HOOK, $(HOOKS), fs/hooks/$(HOOK))
-fs/hooks/%: src/%s
+fs/hooks/%: src/%
 	cp "$<" "$@"
 
