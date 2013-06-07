@@ -17,26 +17,24 @@ system: filesystem packages fs-cleanup trim init-script
 
 .PHONY: filesystem
 filesystem:
+	-rm fs/{sbin,libexec,usr,local,lib64,etc/{fs,m}tab}
 	mkdir -p fs/new_root
-	mkdir -p fs/sbin
-	mkdir -p fs/lib
 	mkdir -p fs/hooks
+	mkdir -p fs/bin
+	mkdir -p fs/lib
 	mkdir -p fs/etc
 	mkdir -p fs/proc
 	mkdir -p fs/dev
 	mkdir -p fs/sys
 	mkdir -p fs/run
 	mkdir -p fs/tmp
-	mkdir -p fs/usr/sbin
-	mkdir -p fs/usr/lib
-	-ln -sf sbin fs/bin
-	-ln -sf sbin fs/usr/bin
-	-ln -sf lib fs/usr/libexec
-	-ln -sf lib fs/libexec
-	-ln -sf lib fs/usr/lib64
-	-ln -sf lib fs/lib64
+	ln -s . fs/usr
+	ln -s . fs/local
+	ln -s bin fs/sbin
+	ln -s bin fs/libexec
+	ln -s lib fs/lib64
 	touch fs/etc/fstab
-	ln -sf /proc/self/mounts fs/etc/mtab
+	ln -s /proc/self/mounts fs/etc/mtab
 
 
 .PHONY: lnfix
@@ -52,16 +50,16 @@ lnfix:
 
 .PHONY: packages
 packages:
-	cd fs && tar --get --xz < $(LIVE_MEDIUM)/pkgs/util-linux.pkg.tar.xz
+	cd fs && $(LIVE_MEDIUM)/tools/tjära --xz < $(LIVE_MEDIUM)/pkgs/util-linux.pkg.tar.xz
 	make util-linux-unbin
-	cd fs && tar --get --xz < $(LIVE_MEDIUM)/pkgs/glibc.pkg.tar.xz
-	cd fs && tar --get --xz < $(LIVE_MEDIUM)/pkgs/systemd.pkg.tar.xz
-	cd fs && tar --get --xz < $(LIVE_MEDIUM)/pkgs/kmod.pkg.tar.xz
-	cd fs && tar --get --xz < $(LIVE_MEDIUM)/pkgs/zlib.pkg.tar.xz
-	cd fs && tar --get --xz < $(LIVE_MEDIUM)/pkgs/acl.pkg.tar.xz
-	cd fs && tar --get --xz < $(LIVE_MEDIUM)/pkgs/attr.pkg.tar.xz
-	cd fs && tar --get --xz < $(LIVE_MEDIUM)/pkgs/device-mapper.pkg.tar.xz
-	cd fs && tar --get --xz < $(LIVE_MEDIUM)/pkgs/e2fsprogs.pkg.tar.xz
+	cd fs && $(LIVE_MEDIUM)/tools/tjära --xz < $(LIVE_MEDIUM)/pkgs/glibc.pkg.tar.xz
+	cd fs && $(LIVE_MEDIUM)/tools/tjära --xz < $(LIVE_MEDIUM)/pkgs/systemd.pkg.tar.xz
+	cd fs && $(LIVE_MEDIUM)/tools/tjära --xz < $(LIVE_MEDIUM)/pkgs/kmod.pkg.tar.xz
+	cd fs && $(LIVE_MEDIUM)/tools/tjära --xz < $(LIVE_MEDIUM)/pkgs/zlib.pkg.tar.xz
+	cd fs && $(LIVE_MEDIUM)/tools/tjära --xz < $(LIVE_MEDIUM)/pkgs/acl.pkg.tar.xz
+	cd fs && $(LIVE_MEDIUM)/tools/tjära --xz < $(LIVE_MEDIUM)/pkgs/attr.pkg.tar.xz
+	cd fs && $(LIVE_MEDIUM)/tools/tjära --xz < $(LIVE_MEDIUM)/pkgs/device-mapper.pkg.tar.xz
+	cd fs && $(LIVE_MEDIUM)/tools/tjära --xz < $(LIVE_MEDIUM)/pkgs/e2fsprogs.pkg.tar.xz
 	make util-linux-rebin
 	make busybox
 
@@ -73,19 +71,16 @@ util-linux-unbin:
 	          logger scriptreplay fsck dmesg hexdump switch_root script sulogin mesg \
 	          mkswap ipcs mount fdformat more ionice mkfs.minix chrt eject setsid \
 	          fdisk ipcrm losetup umount swapoff \
-	;do  rm fs/usr/sbin/"$${f}" 2> /dev/null || \
-	     rm fs/usr/bin/"$${f}" 2> /dev/null || \
-	     rm fs/sbin/"$${f}" 2> /dev/null || \
-	     rm fs/bin/"$${f}" 2> /dev/null || exit 1\
+	;do  rm fs/bin/"$${f}" 2> /dev/null || exit 1\
 	; done
 	for f in  fsck.minix blkid fsck switch_root \
-	;do mv fs/{usr/,}{s,}bin/"$${f}" fs/_"$${f}" || true; done
+	;do mv fs/bin/"$${f}" fs/_"$${f}" || true; done
 
 
 .PHONY: util-linux-rebin
 util-linux-rebin:
 	for f in  fsck.minix blkid fsck switch_root \
-	;do mv fs/_"$${f}" fs/sbin/"$${f}" || true; done
+	;do mv fs/_"$${f}" fs/bin/"$${f}" || true; done
 
 
 
