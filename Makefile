@@ -35,7 +35,7 @@ filesystem:
 	-ln -sf lib fs/usr/lib64
 	-ln -sf lib fs/lib64
 	touch fs/etc/fstab
-	ln -sf /proc/self/mount fs/etc/mtab
+	ln -sf /proc/self/mounts fs/etc/mtab
 
 
 .PHONY: lnfix
