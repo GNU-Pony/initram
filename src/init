@@ -1,6 +1,6 @@
 #!/usr/bin/ash
 
-. /init_head
+. /etc/init_head
 
 udevd_running=0
 mount_handler=default_mount_handler

@@ -1,17 +1,17 @@
 #!/usr/bin/ash
 
 run_hook() {
-    if [ -e /consolefont.psfu ]; then
-	if [ -e /consolefont.psf ]; then
-	    msg "\e[01;31m:: Both /consolefont.psf and /consolefont.psfu found, choosing .psfu\e[0m"
+    if [ -e /etc/consolefont.psfu ]; then
+	if [ -e /etc/consolefont.psf ]; then
+	    msg "\e[01;31m:: Both /etc/consolefont.psf and /etc/consolefont.psfu found, choosing .psfu\e[0m"
 	fi
 	msg ":: Loading console font..."
-	setfont -C /dev/console /consolefont.psfu
-    elif [ -e /consolefont.psf ]; then
+	setfont -C /dev/console /etc/consolefont.psfu
+    elif [ -e /etc/consolefont.psf ]; then
 	msg ":: Loading console font..."
-	setfont -C /dev/console /consolefont.psf
+	setfont -C /dev/console /etc/consolefont.psf
     else
-	msg "\e[01;31m:: No /consolefont.psf or /consolefont.psfu found, required by the hook consolefont\e[0m"
+	msg "\e[01;31m:: No /etc/consolefont.psf or /etc/consolefont.psfu found, required by the hook consolefont\e[0m"
     fi
 }
 
