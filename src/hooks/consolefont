@@ -3,7 +3,7 @@
 run_hook() {
     if [ -e /etc/consolefont.psfu ]; then
 	if [ -e /etc/consolefont.psf ]; then
-	    msg "\e[01;31m:: Both /etc/consolefont.psf and /etc/consolefont.psfu found, choosing .psfu\e[0m"
+	    msg "\e[01;31m:: Both /etc/consolefont.psf and /etc/consolefont.psfu found, choosing .psfu\e[00m"
 	fi
 	msg ":: Loading console font..."
 	setfont -C /dev/console /etc/consolefont.psfu
@@ -11,7 +11,7 @@ run_hook() {
 	msg ":: Loading console font..."
 	setfont -C /dev/console /etc/consolefont.psf
     else
-	msg "\e[01;31m:: No /etc/consolefont.psf or /etc/consolefont.psfu found, required by the hook consolefont\e[0m"
+	msg "\e[01;31m:: No /etc/consolefont.psf or /etc/consolefont.psfu found, required by the hook consolefont\e[00m"
     fi
 }
 
