@@ -1,0 +1,21 @@
+#!/usr/bin/ash
+
+## To make your keymap file run:
+## loadkeys -q [-u] KEYMAP -b > keymap.bin
+
+run_hook() {
+    if [ -e /etc/keymap.bin ]; then
+	msg ":: Loading keymap..."
+	if [ "${UTF8_MODE}" = yes ]; then
+            kbd_mode -u -C /dev/console
+            printf "\033%%G" >> /dev/console
+        else
+            kbd_mode -a -C /dev/console
+            printf "\033%%@" >> /dev/console
+        fi
+        loadkmap < /etc/keymap.bin
+    else
+	msg "\e[01;31m:: No /etc/keymap.bin found, required by the hook keymap\e[00m"
+    fi
+}
+
