@@ -32,9 +32,11 @@ fi
 
 run_hookfunctions 'run_hook' 'hook' $HOOKS
 
-if [ "${break}" = "premount" ] || [ "${break}" = "y" ]; then
-    echo -e "\\e[01;34m::\\e[00m Premount break requested, type 'exit' to resume."
-    launch_interactive_shell
+if [ ! -f '/etc/unbreakable' ]; then
+    if [ "${break}" = "premount" ] || [ "${break}" = "y" ]; then
+	echo -e "\\e[01;34m::\\e[00m Premount break requested, type 'exit' to resume."
+	launch_interactive_shell
+    fi
 fi
 
 _root=$(resolve_device "$root") && root=$_root
@@ -55,9 +57,11 @@ elif [ ! -x "/new_root/sbin/init" ]; then
     launch_interactive_shell --exec
 fi
 
-if [ "${break}" = "postmount" ]; then
-    echo -e "\\e[01;34m::\\e[00m Postmount break requested, type 'exit' to resume."
-    launch_interactive_shell
+if [ ! -f '/etc/unbreakable' ]; then
+    if [ "${break}" = "postmount" ]; then
+	echo -e "\\e[01;34m::\\e[00m Postmount break requested, type 'exit' to resume."
+	launch_interactive_shell
+    fi
 fi
 
 exec env -i "TERM=$TERM" "RD_TIMESTAMP=$RD_TIMESTAMP" \
